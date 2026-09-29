@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: manak_anveshan_postgres
+    environment:
+      POSTGRES_USER: manak_user
+      POSTGRES_PASSWORD: manak_password
+      POSTGRES_DB: manak_anveshan_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: ./backend
+    container_name: manak_anveshan_backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=sqlite:///./manak_anveshan.db
+      - LLM_PROVIDER=demo
+      - LLM_API_KEY=
+      - LLM_MODEL=gemini-1.5-flash
+      - EMBEDDING_MODEL=text-embedding-3-small
+    depends_on:
+      - postgres
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: manak_anveshan_frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
